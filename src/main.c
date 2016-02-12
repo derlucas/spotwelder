@@ -1,7 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-#include <avr/pgmspace.h>
 
 #define DURATION_MAX    8
 
@@ -52,26 +51,26 @@ uint8_t queryButtons(void) {
 
 
 void wait(uint8_t count) {
-	uint8_t i;
-	if(count == 0) count = 100;
-	for(i=0;i<count;i++) {
-		_delay_ms(1);
-	}
+    uint8_t i;
+    if(count == 0) count = 100;
+    for(i=0;i<count;i++) {
+        _delay_ms(1);
+    }
 }
 
 void init_ports() {
-	// buttons as input
+    // buttons as input
     // button UP is PD0
     // button DOWN is PD1
     // ZCD is PD2
-	DDRD &= ~(_BV(PD0) | _BV(PD1) | _BV(PD2));
-	// enable pullups
+    DDRD &= ~(_BV(PD0) | _BV(PD1) | _BV(PD2));
+    // enable pullups
     PORTD |= _BV(PD0) | _BV(PD1) | _BV(PD2);
-	
-	// 7-SEG and MOC as Output
-	DDRB |= 0x1F;       // b00011111
-	DDRD |= 0x70;       // bX1110000
-    
+
+    // 7-SEG and MOC as Output
+    DDRB |= 0x1F;       // b00011111
+    DDRD |= 0x70;       // bX1110000
+
     // switch MOC OFF
     PORTD &= ~_BV(PD4);
 }
@@ -88,31 +87,31 @@ void sevenseg(uint8_t num) {
 
 
 int main(void) {
-
-	init_ports();
+    
+    init_ports();
     init_int_timer();
     
     uint8_t buttons = queryButtons(); // trigger to skip bad results
 
-	while(1) {
-        
+    while(1) {
+
         buttons = queryButtons();
-        
+
         if(buttons & _BV(PD0) && duration > 1) {
             duration--;
         } else if(buttons & _BV(PD1) && duration < DURATION_MAX) {
             duration++;
         }
-        
+
         if(buttons & _BV(PD3)) {
             // Trigger
             trigger = 1;
         }
-        
+
         sevenseg(duration);
-        
+
         wait(100);   // 100ms
-	}
+    }
         
 	return(0);
 } 
